@@ -1,0 +1,22 @@
+[theme]
+# IMC 創新獎 — 預設主題:沉穩學院藍
+primaryColor = "#1a4d7a"
+backgroundColor = "#fafbfd"
+secondaryBackgroundColor = "#eef2f7"
+textColor = "#1d2939"
+font = "sans serif"
+
+[server]
+headless = true
+# 雲端版會由平台自動分配 port
+# 本機版用 8501(預設)
+# port = 8501
+enableCORS = false
+enableXsrfProtection = true
+maxUploadSize = 100  # MB,投件 PDF 通常不會超過
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = false  # 雲端版隱藏錯誤細節(避免洩漏)
