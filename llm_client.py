@@ -18,22 +18,53 @@ import random
 
 
 # 各家提供的模型清單(顯示在 Sidebar)
+# ⭐ Gemini 排第一位 — 最穩、免費額度大、支援讀圖、IMC 評審首選
 PROVIDERS = {
-    "🚀 Groq (免費・最快)": {
-        "key": "groq",
+    "🤖 Google Gemini (免費・推薦)": {
+        "key": "gemini",
         "models": [
-            "llama-3.1-8b-instant",          # 預設,TPM 寬鬆,3 位評審不爆
-            "llama-3.3-70b-versatile",       # 品質好,但 TPM 緊
-            "deepseek-r1-distill-llama-70b", # 推理強
-            "gemma2-9b-it",
+            "gemini-2.5-flash-lite",   # 預設!額度最寬、TPM 最大、長文徵文穩
+            "gemini-2.5-flash",        # 品質更好、額度也夠
+            "gemini-2.5-pro",          # 旗艦、最強、但 quota 緊
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-lite",
         ],
-        "default_model": "llama-3.1-8b-instant",
-        "api_key_url": "https://console.groq.com/keys",
-        "api_key_prefix": "gsk_...",
-        "free_tier": "每分鐘 30 次免費・速度極快(每秒千 token)",
-        "env_var": "GROQ_API_KEY",
-        "base_url": "https://api.groq.com/openai/v1",
-        "pricing": {},  # 免費層
+        "default_model": "gemini-2.5-flash-lite",
+        "api_key_url": "https://aistudio.google.com/app/apikey",
+        "api_key_prefix": "AIza...",
+        "free_tier": "每天免費 1500 次・支援讀圖・IMC 評審首選",
+        "env_var": "GOOGLE_API_KEY",
+        "base_url": None,  # 用官方 SDK
+        "pricing": {
+            "gemini-2.5-pro": (1.25, 5.0),
+            "gemini-2.5-flash": (0.0, 0.0),
+            "gemini-2.5-flash-lite": (0.0, 0.0),
+            "gemini-2.0-flash": (0.0, 0.0),
+            "gemini-2.0-flash-lite": (0.0, 0.0),
+        },
+    },
+    "💎 Anthropic Claude (品質最頂)": {
+        "key": "anthropic",
+        "models": [
+            "claude-sonnet-4-5",
+            "claude-opus-4-5",
+            "claude-opus-4-1",
+            "claude-haiku-4-5",
+            "claude-3-7-sonnet-latest",
+        ],
+        "default_model": "claude-sonnet-4-5",
+        "api_key_url": "https://console.anthropic.com/settings/keys",
+        "api_key_prefix": "sk-ant-...",
+        "free_tier": "新帳號送 $5 試用(夠評 18 件)・支援讀圖・品質頂尖",
+        "env_var": "ANTHROPIC_API_KEY",
+        "base_url": None,
+        "pricing": {
+            "claude-sonnet-4-5": (3.0, 15.0),
+            "claude-opus-4-5": (15.0, 75.0),
+            "claude-opus-4-1": (15.0, 75.0),
+            "claude-haiku-4-5": (0.80, 4.0),
+            "claude-3-7-sonnet-latest": (3.0, 15.0),
+        },
     },
     "🌍 OpenRouter (免費模型聚合)": {
         "key": "openrouter",
@@ -41,10 +72,10 @@ PROVIDERS = {
             # ─── 無充值門檻組(優先使用)─────────────
             "nvidia/nemotron-nano-9b-v2:free",                # 預設,無門檻最穩
             "google/gemma-4-31b-it:free",                     # Gemma 4 31B,通常無門檻
-            "nvidia/nemotron-nano-12b-v2-vl:free",            # NVIDIA Nano 12B
+            "nvidia/nemotron-nano-12b-v2-vl:free",            # NVIDIA Nano 12B(支援讀圖)
             "liquid/lfm-2.5-1.2b-instruct:free",              # 超輕量
             "openrouter/free",                                # OpenRouter 自家免費
-            # ─── 可能需充值組(輸入 $10 帳號才能用)─────
+            # ─── 需充值 $10 帳號才能用(只做門檻不扣錢)─
             "meta-llama/llama-3.3-70b-instruct:free",
             "deepseek/deepseek-v4-flash:free",
             "qwen/qwen3-next-80b-a3b-instruct:free",
@@ -57,7 +88,7 @@ PROVIDERS = {
         "default_model": "nvidia/nemotron-nano-9b-v2:free",
         "api_key_url": "https://openrouter.ai/keys",
         "api_key_prefix": "sk-or-v1-...",
-        "free_tier": "⚠️ 部分:free 模型需充值 $10(僅做門檻不扣)・無門檻模型在清單最上方",
+        "free_tier": "⚠️ 部分:free 模型需充值 $10(僅做門檻不扣)",
         "env_var": "OPENROUTER_API_KEY",
         "base_url": "https://openrouter.ai/api/v1",
         "pricing": {},
@@ -78,51 +109,21 @@ PROVIDERS = {
         "base_url": "https://api.mistral.ai/v1",
         "pricing": {},
     },
-    "🤖 Google Gemini (免費)": {
-        "key": "gemini",
+    "🚀 Groq (速度最快・短文評審)": {
+        "key": "groq",
         "models": [
-            "gemini-2.5-flash",        # 預設
-            "gemini-2.5-pro",
-            "gemini-2.5-flash-lite",   # 最寬鬆額度
-            "gemini-2.0-flash",
-            "gemini-2.0-flash-lite",
+            "llama-3.1-8b-instant",          # 預設,TPM 寬鬆
+            "llama-3.3-70b-versatile",       # 品質好,但 TPM 緊
+            "deepseek-r1-distill-llama-70b", # 推理強
+            "gemma2-9b-it",
         ],
-        "default_model": "gemini-2.5-flash",
-        "api_key_url": "https://aistudio.google.com/app/apikey",
-        "api_key_prefix": "AIza...",
-        "free_tier": "每天免費 1500 次(Flash),不需綁信用卡",
-        "env_var": "GOOGLE_API_KEY",
-        "base_url": None,  # 用官方 SDK
-        "pricing": {
-            "gemini-2.5-pro": (1.25, 5.0),
-            "gemini-2.5-flash": (0.0, 0.0),
-            "gemini-2.5-flash-lite": (0.0, 0.0),
-            "gemini-2.0-flash": (0.0, 0.0),
-            "gemini-2.0-flash-lite": (0.0, 0.0),
-        },
-    },
-    "💎 Anthropic Claude (付費)": {
-        "key": "anthropic",
-        "models": [
-            "claude-sonnet-4-5",
-            "claude-opus-4-5",
-            "claude-opus-4-1",
-            "claude-haiku-4-5",
-            "claude-3-7-sonnet-latest",
-        ],
-        "default_model": "claude-sonnet-4-5",
-        "api_key_url": "https://console.anthropic.com/settings/keys",
-        "api_key_prefix": "sk-ant-...",
-        "free_tier": "新帳號送 $5 試用,之後付費",
-        "env_var": "ANTHROPIC_API_KEY",
-        "base_url": None,
-        "pricing": {
-            "claude-sonnet-4-5": (3.0, 15.0),
-            "claude-opus-4-5": (15.0, 75.0),
-            "claude-opus-4-1": (15.0, 75.0),
-            "claude-haiku-4-5": (0.80, 4.0),
-            "claude-3-7-sonnet-latest": (3.0, 15.0),
-        },
+        "default_model": "llama-3.1-8b-instant",
+        "api_key_url": "https://console.groq.com/keys",
+        "api_key_prefix": "gsk_...",
+        "free_tier": "速度最快(每秒千 token)・⚠️ 長文徵文易爆 TPM",
+        "env_var": "GROQ_API_KEY",
+        "base_url": "https://api.groq.com/openai/v1",
+        "pricing": {},  # 免費層
     },
 }
 
