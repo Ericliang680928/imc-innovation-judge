@@ -176,50 +176,47 @@ with st.sidebar:
     st.caption(f"💰 **{provider_info['free_tier']}**")
     st.caption(f"🔑 申請 Key:[點此前往]({provider_info['api_key_url']})")
 
-    # 動態模型清單(若視覺增強開啟,過濾出支援 vision 的)
+    # 視覺增強模式 toggle(放在模型選擇之前,這樣 enable_vision 才能影響模型清單)
+    st.markdown("### 👁️ 視覺增強模式")
+    enable_vision = st.toggle(
+        "讓 AI 讀圖(流程圖、商業模式畫布、數據圖表)",
+        value=False,
+        key="__vision_toggle",
+        help="開啟後,系統會把 PDF 每頁/PPT 每張轉成圖片送給 Vision AI 一起判讀。"
+             "Token 消耗 ~5 倍,只支援多模態模型(Gemini/Claude 全系列)。",
+    )
+
+    # 動態模型清單(視覺增強開啟時只顯示支援 vision 的模型)
     from llm_client import is_vision_capable
     all_models = provider_info["models"]
-    if "enable_vision" in dir() or True:  # placeholder,enable_vision 後面才宣告
-        pass
-    # 用 session state 暫存,讓視覺切換生效
-    _vision_on = st.session_state.get("__vision_toggle", False)
-    if _vision_on:
+    if enable_vision:
         filtered = [m for m in all_models if is_vision_capable(m)]
         if filtered:
             available_models = filtered
             st.caption("👁️ 視覺模式開啟 — 已過濾出支援讀圖的模型")
         else:
             available_models = all_models
-            st.warning("⚠️ 此服務商的免費模型都不支援讀圖,請改用其他服務商")
+            st.warning("⚠️ 此服務商無支援讀圖的免費模型,請改用 Gemini 或 Claude")
     else:
         available_models = all_models
+
     model = st.selectbox(
         "評審模型",
         options=available_models,
         index=0,
-        help="預設模型已平衡品質與速度。若開啟視覺增強,清單會只顯示支援讀圖的模型。",
+        help="預設模型平衡品質與速度。視覺增強開啟時只顯示支援讀圖的模型。",
     )
 
-    max_tokens = st.slider("回應長度上限(tokens)", 4000, 16000, 12000, 1000)
-
-    st.divider()
-
-    # 視覺增強模式
-    st.markdown("### 👁️ 視覺增強模式")
-    enable_vision = st.toggle(
-        "讓 AI 讀圖(讀懂流程圖、商業模式畫布、數據圖表)",
-        value=False,
-        key="__vision_toggle",
-        help="開啟後,系統會把 PDF 每頁/PPT 每張轉成圖片送給 Vision AI 一起判讀。"
-             "Token 消耗 ~5 倍,只支援多模態模型(Gemini/Claude 全系列、部分 OpenRouter)。"
-             "切換後請重新選擇模型。",
-    )
     max_vision_pages = st.slider(
         "視覺增強最大頁數",
         min_value=5, max_value=30, value=15, step=1,
         disabled=not enable_vision,
         help="超過此頁數的內容只保留文字,避免 token 爆量",
     )
+
+    st.divider()
+
+    max_tokens = st.slider("回應長度上限(tokens)", 4000, 16000, 12000, 1000)
 
     st.divider()
 
