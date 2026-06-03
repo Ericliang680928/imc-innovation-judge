@@ -49,6 +49,24 @@ def run_single_judge(
         temperature=persona["temperature"],
         images=images,
     )
+
+    # 記錄用量(僅本 session)
+    try:
+        from usage_tracker import log_api_call, estimate_call_tokens
+        in_tok, out_tok = estimate_call_tokens(
+            content_chars=len(content) + len(case_title or ""),
+            has_system_prompt=True,
+            max_output_tokens=max_tokens,
+        )
+        log_api_call(
+            provider=provider, model=model,
+            in_tokens=in_tok, out_tokens=out_tok,
+            is_vision=bool(images),
+            n_images=len(images) if images else 0,
+        )
+    except Exception:
+        pass  # 用量追蹤失敗不影響主流程
+
     return persona_name, text
 
 

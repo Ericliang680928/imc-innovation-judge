@@ -223,6 +223,12 @@ with st.sidebar:
     theme_name = st.selectbox("🎨 介面主題", list(THEMES.keys()), index=0)
 
     st.divider()
+
+    # 📊 本 session 用量追蹤器
+    from usage_tracker import render_sidebar_widget as _render_usage
+    _render_usage()
+
+    st.divider()
     st.caption(
         "💡 **多評審模式提示**\n\n"
         "- N=1:快速試評\n"
